@@ -6,13 +6,14 @@
 
 ## 1. Twitter / X (英文,~280 字符)
 
-> Just shipped Hermes Desktop v0.1.0 — an all-in-one cross-platform packaging of @NousResearch's hermes-agent + EKKO Learn AI's hermes-web-ui.
+> Just shipped Hermes Desktop v0.1.1 — an all-in-one cross-platform packaging of @NousResearch's hermes-agent + EKKO Learn AI's hermes-web-ui.
 >
 > Bundles Python + agent + web UI into one dmg/exe/AppImage. No `pip install`, no `npm install`. Download → run → chat.
 >
 > 5 platforms · MIT · github.com/sir1st/hermes-desktop
 
-带图建议:`docs/screenshot-chat.png`
+**附图**:贴 `docs/demo.gif`(50s 实录,4.4MB,Twitter 5MB 上限内)。
+回退方案:贴 `docs/social-card.png` 或 `docs/screenshot-chat.png`。
 
 ---
 
@@ -27,6 +28,8 @@
 > ✅ 自动更新
 >
 > github.com/sir1st/hermes-desktop
+
+**附 gif**:`docs/demo.gif` 钉钉群里 @ 机器人,DeepSeek 流式回复全过程。
 
 ---
 
@@ -173,9 +176,14 @@
 
 **不要做的事**:同一天往多个 subreddit 投同一篇(会被标 spam);批量加 GitHub stars(易封号);评论里硬塞链接(版主会删)。
 
-## 9. 还需要的物料(我可以做)
+## 9. 物料清单(全部完成)
 
-- [ ] 一个 30s 的 demo gif/mp4(打开应用 → 配 API key → 聊一句 → 钉钉里 @ 机器人)
-- [ ] OpenGraph / social-card 图(发链接时预览图,1200x630)
-- [ ] 中文掘金长文版(展开技术踩坑章节)
-- [ ] HN 评论里可能会被问的 FAQ 准备答案
+| 文件 | 用途 |
+|------|------|
+| `docs/demo.gif` (4.4MB) | Twitter / Reddit / 微博附图 |
+| `docs/demo.mp4` (1.5MB) | README 顶部链接 + B 站 / YouTube 上传源 |
+| `docs/social-card.png` (1200×630) | OpenGraph 卡片,发链接时预览大图 |
+| `docs/screenshot-chat.png` | 静态主界面截图 |
+| `docs/show-hn-faq.md` | HN 评论区高频问题预备答案 |
+| `docs/juejin-article.md` | 3000 字中文长文 |
+| `docs/drafts/` | 已发到上游的 PR / Issue 内容存档 |
