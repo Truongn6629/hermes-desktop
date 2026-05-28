@@ -9,8 +9,14 @@ const __dirname = dirname(fileURLToPath(import.meta.url))
 const ROOT = resolve(__dirname, '..')
 const SERVER_JS = resolve(ROOT, 'vendor/hermes-web-ui/dist/server/index.js')
 
+const BRIDGE_PY = resolve(ROOT, 'vendor/hermes-web-ui/dist/server/agent-bridge/hermes_bridge.py')
+
 if (!existsSync(SERVER_JS)) {
   console.error(`server bundle not found at ${SERVER_JS}`)
+  process.exit(1)
+}
+if (!existsSync(BRIDGE_PY)) {
+  console.error(`bridge script not found at ${BRIDGE_PY}`)
   process.exit(1)
 }
 
@@ -57,4 +63,42 @@ patch(
 )
 
 if (src !== before) writeFileSync(SERVER_JS, src)
+
+// ── Patch the Python bridge script: force TCP worker endpoint on macOS too.
+// Default is unix socket which macOS EDR/sandbox kills (same root cause as
+// the broker SIGKILL we fixed by setting HERMES_AGENT_BRIDGE_ENDPOINT).
+{
+  console.log(`Patching ${BRIDGE_PY}`)
+  let py = readFileSync(BRIDGE_PY, 'utf-8')
+  const pyBefore = py
+  const marker = '# patch:worker-tcp-everywhere'
+  if (py.includes(marker)) {
+    console.log(`  · worker-tcp-everywhere  (already applied)`)
+  } else {
+    const find = `def _worker_endpoint(key: str) -> str:
+    safe = hashlib.sha256(key.encode("utf-8")).hexdigest()[:16]
+    if os.name == "nt":
+        port_base = int(os.environ.get("HERMES_AGENT_BRIDGE_WORKER_PORT_BASE", "18780"))
+        return f"tcp://127.0.0.1:{port_base + int(safe[:4], 16) % 1000}"
+    root = Path(tempfile.gettempdir()) / "hermes-agent-bridge-workers"
+    return f"ipc://{root / f'{safe}.sock'}"`
+    const replace = `def _worker_endpoint(key: str) -> str:  ${marker}
+    safe = hashlib.sha256(key.encode("utf-8")).hexdigest()[:16]
+    # Always use TCP loopback for worker endpoints. Unix sockets in /tmp are
+    # rejected by some macOS EDR/sandbox setups when the broker is spawned
+    # from an unsigned Electron child, causing the worker to be SIGKILL'd
+    # before reporting ready. TCP works identically and is safe on all OSes.
+    port_base = int(os.environ.get("HERMES_AGENT_BRIDGE_WORKER_PORT_BASE", "18780"))
+    return f"tcp://127.0.0.1:{port_base + int(safe[:4], 16) % 1000}"`
+    if (!py.includes(find)) {
+      console.log(`  ✗ worker-tcp-everywhere  (anchor not found)`)
+    } else {
+      py = py.replace(find, replace)
+      console.log(`  ✓ worker-tcp-everywhere`)
+      applied++
+    }
+  }
+  if (py !== pyBefore) writeFileSync(BRIDGE_PY, py)
+}
+
 console.log(`Done. Applied ${applied}, skipped ${skipped}.`)
