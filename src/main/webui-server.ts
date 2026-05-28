@@ -83,6 +83,12 @@ export async function startWebUiServer(port = DEFAULT_PORT): Promise<string> {
     // SIGKILL of the bridge child within ~150ms). TCP on 127.0.0.1 works
     // identically and avoids the issue cross-platform.
     HERMES_AGENT_BRIDGE_ENDPOINT: 'tcp://127.0.0.1:18765',
+    // Single-user desktop install: open the gateway's user allowlist by
+    // default. Otherwise the gateway silently drops every inbound platform
+    // message (DingTalk/Slack/Telegram) with a startup warning. Users can
+    // still override by setting GATEWAY_ALLOW_ALL_USERS=false in their
+    // ~/.hermes/.env or by configuring per-platform allowlists.
+    GATEWAY_ALLOW_ALL_USERS: process.env.GATEWAY_ALLOW_ALL_USERS ?? 'true',
     HERMES_WEB_UI_HOME: home,
     AUTH_TOKEN: token,
     PORT: String(port),
