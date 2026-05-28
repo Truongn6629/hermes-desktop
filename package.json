@@ -13,7 +13,6 @@
     "fetch:python": "node scripts/fetch-python.mjs",
     "install:hermes": "node scripts/install-hermes.mjs",
     "prepare:python": "npm run fetch:python && npm run install:hermes",
-    "rebuild:native": "electron-rebuild -f -w node-pty --module-dir vendor/hermes-web-ui",
     "dev": "npm run build:main && electron .",
     "dist": "npm run build && electron-builder",
     "dist:mac": "npm run build && electron-builder --mac",
@@ -21,11 +20,9 @@
     "dist:linux": "npm run build && electron-builder --linux"
   },
   "devDependencies": {
-    "@electron/rebuild": "^3.7.0",
     "@types/node": "^24.12.2",
     "electron": "^42.3.0",
     "electron-builder": "^25.1.8",
-    "tar": "^7.4.3",
     "typescript": "~5.6.3"
   },
   "dependencies": {
