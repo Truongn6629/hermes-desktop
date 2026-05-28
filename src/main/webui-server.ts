@@ -3,7 +3,7 @@ import { mkdirSync, readFileSync, writeFileSync, chmodSync, existsSync } from 'n
 import { dirname, delimiter, join } from 'node:path'
 import { randomBytes } from 'node:crypto'
 import { app } from 'electron'
-import { webuiServerEntry, webuiDir, hermesBin, webUiHome, tokenFile } from './paths'
+import { webuiServerEntry, webuiDir, hermesBin, webUiHome, tokenFile, pythonDir } from './paths'
 
 const DEFAULT_PORT = 8648
 const READY_TIMEOUT_MS = 30_000
@@ -61,12 +61,28 @@ export async function startWebUiServer(port = DEFAULT_PORT): Promise<string> {
   const home = webUiHome()
   mkdirSync(home, { recursive: true })
 
+  // Tell agent-bridge to use the bundled Python directly. Otherwise the
+  // bridge auto-detects Python from HERMES_BIN's shebang — which on our
+  // setup is a #!/bin/sh wrapper, not a python interpreter, so detection
+  // resolves to /bin/sh and the bridge crashes (exit code 2) immediately.
+  const isWin = process.platform === 'win32'
+  const bundledPython = isWin
+    ? join(pythonDir(), 'python.exe')
+    : join(pythonDir(), 'bin', 'python3')
+
   // Run via Electron's "run as Node" mode — Electron binary doubles as Node.
   const env: NodeJS.ProcessEnv = {
     ...process.env,
     ELECTRON_RUN_AS_NODE: '1',
     NODE_ENV: 'production',
     HERMES_BIN: hermesBin(),
+    HERMES_AGENT_BRIDGE_PYTHON: bundledPython,
+    HERMES_AGENT_ROOT: pythonDir(),
+    // Force TCP loopback for the agent bridge. The default `ipc:///tmp/...`
+    // unix socket is rejected on macOS in some EDR/sandbox setups (silent
+    // SIGKILL of the bridge child within ~150ms). TCP on 127.0.0.1 works
+    // identically and avoids the issue cross-platform.
+    HERMES_AGENT_BRIDGE_ENDPOINT: 'tcp://127.0.0.1:18765',
     HERMES_WEB_UI_HOME: home,
     AUTH_TOKEN: token,
     PORT: String(port),

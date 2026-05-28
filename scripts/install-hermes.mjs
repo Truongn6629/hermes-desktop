@@ -59,6 +59,31 @@ if (!existsSync(hermesBin)) {
   process.exit(1)
 }
 
+// hermes-web-ui's agent-bridge searches for `run_agent.py` at <python_root>/run_agent.py
+// (and a few neighbouring dirs). pip places it at site-packages/run_agent.py — surface
+// it at the venv root so the bridge resolveAgentRoot() lookup hits.
+const { readdirSync, symlinkSync, copyFileSync, unlinkSync, lstatSync } = await import('node:fs')
+function siteRunAgent() {
+  if (TARGET_OS === 'win32') {
+    return resolve(PY_DIR, 'Lib', 'site-packages', 'run_agent.py')
+  }
+  const libDir = resolve(PY_DIR, 'lib')
+  const py = readdirSync(libDir).find(n => /^python\d+\.\d+$/.test(n))
+  return resolve(libDir, py, 'site-packages', 'run_agent.py')
+}
+{
+  const src = siteRunAgent()
+  const dst = resolve(PY_DIR, 'run_agent.py')
+  if (existsSync(src)) {
+    try { lstatSync(dst); unlinkSync(dst) } catch {}
+    if (TARGET_OS === 'win32') copyFileSync(src, dst)
+    else symlinkSync(src, dst)
+    console.log(`✓ run_agent.py linked at venv root (for agent-bridge resolution)`)
+  } else {
+    console.warn(`! run_agent.py not found at ${src} — agent-bridge may fail`)
+  }
+}
+
 // Relocate: replace the pip-generated launcher (which embeds an absolute
 // shebang to the build-time Python path) with a relative wrapper so the
 // bundled venv works after being moved into the .app/.exe payload.
