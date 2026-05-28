@@ -68,6 +68,9 @@ jobs:
           npm run build
           npm prune --omit=dev
 
+      - name: Apply local web-ui patches
+        run: node scripts/apply-webui-patches.mjs
+
       - name: Fetch bundled Python
         env:
           TARGET_OS: ${{ matrix.target_os }}
