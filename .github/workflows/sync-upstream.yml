@@ -2,9 +2,12 @@ name: Sync upstream submodules
 
 on:
   schedule:
-    # Off-peak minutes (2,7,12,...,57) — avoids the global :00/:05/:10 cron
-    # stampede that causes GitHub Actions to silently drop scheduled runs.
-    - cron: "2-59/5 * * * *"
+    # ~15-minute cadence on off-peak minutes (XX:07, :22, :37, :52). GitHub
+    # Actions schedule events are best-effort and routinely delayed 15-60 min
+    # under load; pretending we'll get :05 granularity just produces silently
+    # dropped runs. A desktop wrapper waiting half an hour for an upstream
+    # npm publish to land is fine — set expectations accordingly.
+    - cron: "7,22,37,52 * * * *"
   workflow_dispatch:
 
 permissions:
