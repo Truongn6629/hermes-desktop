@@ -7,6 +7,7 @@ import { initAutoUpdater } from './updater'
 const PORT = Number(process.env.HERMES_DESKTOP_PORT) || 8648
 
 let mainWindow: BrowserWindow | null = null
+let serverUrl: string | null = null
 
 function createWindow() {
   mainWindow = new BrowserWindow({
@@ -33,8 +34,14 @@ function createWindow() {
     return { action: 'deny' }
   })
 
-  // Show a loading splash from data URL until the real UI is ready
-  mainWindow.loadURL(splashHtml())
+  // If the Web UI server is already up (re-opening window after close on
+  // macOS), go straight to it. Otherwise show a loading splash; bootstrap()
+  // will swap in the real URL once the server is ready.
+  if (serverUrl) {
+    mainWindow.loadURL(serverUrl)
+  } else {
+    mainWindow.loadURL(splashHtml())
+  }
 }
 
 function splashHtml(): string {
@@ -64,6 +71,7 @@ async function bootstrap() {
 
   try {
     const url = await startWebUiServer(PORT)
+    serverUrl = url
     if (mainWindow) await mainWindow.loadURL(url)
   } catch (err) {
     console.error('Failed to start Web UI server:', err)
@@ -96,7 +104,13 @@ if (!gotLock) {
     bootstrap()
     initAutoUpdater()
     app.on('activate', () => {
-      if (BrowserWindow.getAllWindows().length === 0) createWindow()
+      if (BrowserWindow.getAllWindows().length === 0) {
+        createWindow()
+      } else if (mainWindow) {
+        if (mainWindow.isMinimized()) mainWindow.restore()
+        mainWindow.show()
+        mainWindow.focus()
+      }
     })
   })
 
