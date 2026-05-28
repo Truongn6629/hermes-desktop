@@ -83,6 +83,15 @@ export async function startWebUiServer(port = DEFAULT_PORT): Promise<string> {
     // SIGKILL of the bridge child within ~150ms). TCP on 127.0.0.1 works
     // identically and avoids the issue cross-platform.
     HERMES_AGENT_BRIDGE_ENDPOINT: 'tcp://127.0.0.1:18765',
+    // Force TCP for worker endpoints too (upstream #1106). Same EDR/sandbox
+    // reason as above — default ipc:// unix sockets in /tmp get killed.
+    HERMES_AGENT_BRIDGE_WORKER_TRANSPORT: 'tcp',
+    // And for preview-mode bridges spawned by the in-app update controller.
+    HERMES_WEB_UI_PREVIEW_AGENT_BRIDGE_TRANSPORT: 'tcp',
+    // Suppress the npm-registry update prompt (upstream #1105). hermes-web-ui
+    // is bundled here; users can't `npm i -g` to upgrade, they have to wait
+    // for the wrapper app to ship a new release.
+    HERMES_WEB_UI_DISABLE_UPDATE_CHECK: 'true',
     // Single-user desktop install: open the gateway's user allowlist by
     // default. Otherwise the gateway silently drops every inbound platform
     // message (DingTalk/Slack/Telegram) with a startup warning. Users can

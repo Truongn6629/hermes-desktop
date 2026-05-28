@@ -9,14 +9,8 @@ const __dirname = dirname(fileURLToPath(import.meta.url))
 const ROOT = resolve(__dirname, '..')
 const SERVER_JS = resolve(ROOT, 'vendor/hermes-web-ui/dist/server/index.js')
 
-const BRIDGE_PY = resolve(ROOT, 'vendor/hermes-web-ui/dist/server/agent-bridge/hermes_bridge.py')
-
 if (!existsSync(SERVER_JS)) {
   console.error(`server bundle not found at ${SERVER_JS}`)
-  process.exit(1)
-}
-if (!existsSync(BRIDGE_PY)) {
-  console.error(`bridge script not found at ${BRIDGE_PY}`)
   process.exit(1)
 }
 
@@ -64,31 +58,13 @@ patch(
 
 if (src !== before) writeFileSync(SERVER_JS, src)
 
-// ── Patch the Python bridge script: force TCP worker endpoint on macOS too.
-// Default is unix socket which macOS EDR/sandbox kills (same root cause as
-// the broker SIGKILL we fixed by setting HERMES_AGENT_BRIDGE_ENDPOINT).
-{
-  console.log(`Patching ${BRIDGE_PY}`)
-  let py = readFileSync(BRIDGE_PY, 'utf-8')
-  const pyBefore = py
-  const marker = '# patch:worker-tcp-everywhere'
-  if (py.includes(marker)) {
-    console.log(`  · worker-tcp-everywhere  (already applied)`)
-  } else {
-    // Match the whole `if os.name == "nt": ... else ipc:// fallback` branch
-    // tolerant of any function signature changes upstream may make. We replace
-    // just the platform branch with a single TCP return.
-    const find = /(\n {4})if os\.name == "nt":\s*\n {8}port_base = int\(os\.environ\.get\("HERMES_AGENT_BRIDGE_WORKER_PORT_BASE", "18780"\)\)\s*\n {8}return f"tcp:\/\/127\.0\.0\.1:\{port_base \+ int\(safe\[:4\], 16\) % 1000\}"\s*\n {4}root = Path\(tempfile\.gettempdir\(\)\) \/ "hermes-agent-bridge-workers"\s*\n {4}return f"ipc:\/\/\{root \/ f'\{safe\}\.sock'\}"/
-    const replace = `$1${marker}\n    # Always use TCP loopback for worker endpoints. Unix sockets in /tmp are\n    # rejected by some macOS EDR/sandbox setups when the broker is spawned\n    # from an unsigned Electron child, causing the worker to be SIGKILL'd\n    # before reporting ready. TCP works identically and is safe on all OSes.\n    port_base = int(os.environ.get("HERMES_AGENT_BRIDGE_WORKER_PORT_BASE", "18780"))\n    return f"tcp://127.0.0.1:{port_base + int(safe[:4], 16) % 1000}"`
-    if (!find.test(py)) {
-      console.log(`  ✗ worker-tcp-everywhere  (anchor not found)`)
-    } else {
-      py = py.replace(find, replace)
-      console.log(`  ✓ worker-tcp-everywhere`)
-      applied++
-    }
-  }
-  if (py !== pyBefore) writeFileSync(BRIDGE_PY, py)
-}
+// NOTE: a previous `worker-tcp-everywhere` patch on hermes_bridge.py was
+// retired upstream in EKKOLearnAI/hermes-web-ui#1106. The new env vars
+//   HERMES_AGENT_BRIDGE_WORKER_TRANSPORT=tcp
+//   HERMES_WEB_UI_PREVIEW_AGENT_BRIDGE_TRANSPORT=tcp
+// are now set in src/main/webui-server.ts and achieve the same outcome
+// without modifying vendored code. PR #1105 also added
+//   HERMES_WEB_UI_DISABLE_UPDATE_CHECK=true
+// which we set the same way to suppress the bottom-left update prompt.
 
 console.log(`Done. Applied ${applied}, skipped ${skipped}.`)

@@ -15,13 +15,14 @@ git remote set-url origin "https://x-access-token:${GH_TOKEN}@github.com/${GITHU
 # Commit the staged submodule pointer + version bump.
 git add -A
 cat > /tmp/commit-msg.txt <<EOF
-chore(deps): bump hermes-web-ui to ${NEW_SHA:0:12}
+chore(deps): bump hermes-web-ui to ${UPSTREAM_TAG:-${NEW_SHA:0:12}}
 
-Auto-sync from upstream (${COMMIT_COUNT} commit(s)). Patches sanity
-check passed, fast-pathed straight to main.
+Auto-sync from upstream npm release (${COMMIT_COUNT} commit(s) since
+last). Patches sanity check passed, fast-pathed straight to main.
 
-- ${OLD_SHA} → ${NEW_SHA}
-- v${OLD_VER} → v${NEW_VER}
+- upstream: v${OLD_UPSTREAM_VER:-?} → v${NEW_UPSTREAM_VER:-?}
+- submodule: ${OLD_SHA} → ${NEW_SHA}
+- desktop:  v${OLD_VER} → v${NEW_VER}
 EOF
 git commit -F /tmp/commit-msg.txt
 
