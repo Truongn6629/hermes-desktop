@@ -1,0 +1,51 @@
+name: Tag on version bump
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "package.json"
+
+permissions:
+  contents: write
+  actions: write   # to dispatch release.yml
+
+jobs:
+  maybe-tag:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Detect version change & tag + dispatch release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          VERSION=$(jq -r .version package.json)
+          TAG="v$VERSION"
+
+          if git rev-parse "$TAG" >/dev/null 2>&1; then
+            echo "Tag $TAG already exists, skipping."
+            exit 0
+          fi
+
+          # Only tag if this push to main actually changed the version field
+          if ! git diff HEAD~1 HEAD -- package.json 2>/dev/null | grep -qE '^\+\s*"version":'; then
+            echo "→ package.json changed but version field didn't. Skipping."
+            exit 0
+          fi
+
+          git config user.name "hermes-desktop-bot"
+          git config user.email "hermes-desktop-bot@users.noreply.github.com"
+          git tag -a "$TAG" -m "Automated release $TAG"
+          git push origin "$TAG"
+          echo "✓ Pushed $TAG"
+
+          # Tags pushed via GITHUB_TOKEN don't trigger other workflows.
+          # Dispatch release.yml directly — workflow_dispatch via API IS allowed.
+          gh workflow run release.yml \
+            --repo "$GITHUB_REPOSITORY" \
+            --ref "$TAG"
+          echo "✓ Dispatched release.yml on ref $TAG"
