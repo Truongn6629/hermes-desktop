@@ -12,7 +12,7 @@ const ROOT = resolve(__dirname, '..')
 
 const TARGET_OS = process.env.TARGET_OS || osPlatform()
 const TARGET_ARCH = process.env.TARGET_ARCH || osArch()
-const HERMES_VERSION = process.env.HERMES_VERSION || '0.15.1'
+const HERMES_VERSION = process.env.HERMES_VERSION || '0.15.2'
 
 const OS_LABEL = TARGET_OS === 'win32' ? 'win' : TARGET_OS === 'darwin' ? 'mac' : TARGET_OS
 const PY_DIR = resolve(ROOT, 'resources', 'python', `${OS_LABEL}-${TARGET_ARCH}`)
