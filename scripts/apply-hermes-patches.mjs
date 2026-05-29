@@ -18,15 +18,19 @@ const TARGET_ARCH = process.env.TARGET_ARCH || osArch()
 const OS_LABEL = TARGET_OS === 'win32' ? 'win' : TARGET_OS === 'darwin' ? 'mac' : TARGET_OS
 const PY_DIR = resolve(ROOT, 'resources', 'python', `${OS_LABEL}-${TARGET_ARCH}`)
 
-const sitePkgs = TARGET_OS === 'win32'
-  ? join(PY_DIR, 'Lib', 'site-packages')
-  : (() => {
-      const libDir = join(PY_DIR, 'lib')
-      if (!existsSync(libDir)) throw new Error(`No lib dir at ${libDir}`)
-      const py = readdirSync(libDir).find(n => /^python\d+\.\d+$/.test(n))
-      if (!py) throw new Error(`Could not locate pythonX.Y under ${libDir}`)
-      return join(libDir, py, 'site-packages')
-    })()
+// Allow the CI sanity-check path to point at a temp install dir without
+// the full bundled-Python layout (e.g. `pip install --target /tmp/foo`).
+const sitePkgs = process.env.HERMES_AGENT_SITE_PACKAGES ?? (
+  TARGET_OS === 'win32'
+    ? join(PY_DIR, 'Lib', 'site-packages')
+    : (() => {
+        const libDir = join(PY_DIR, 'lib')
+        if (!existsSync(libDir)) throw new Error(`No lib dir at ${libDir}`)
+        const py = readdirSync(libDir).find(n => /^python\d+\.\d+$/.test(n))
+        if (!py) throw new Error(`Could not locate pythonX.Y under ${libDir}`)
+        return join(libDir, py, 'site-packages')
+      })()
+)
 
 const dtPath = join(sitePkgs, 'gateway', 'platforms', 'dingtalk.py')
 if (!existsSync(dtPath)) {
