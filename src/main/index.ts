@@ -1,4 +1,4 @@
-import { app, BrowserWindow, shell, ipcMain } from 'electron'
+import { app, BrowserWindow, Menu, shell, ipcMain } from 'electron'
 import { join } from 'node:path'
 import { startWebUiServer, stopWebUiServer, getToken } from './webui-server'
 import { hermesBinExists, hermesBin } from './paths'
@@ -17,6 +17,7 @@ function createWindow() {
     minHeight: 600,
     title: 'Hermes Desktop',
     backgroundColor: '#1a1a1a',
+    autoHideMenuBar: true,
     webPreferences: {
       preload: join(__dirname, '..', 'preload', 'index.js'),
       contextIsolation: true,
@@ -100,6 +101,11 @@ if (!gotLock) {
   })
 
   app.whenReady().then(() => {
+    // Drop the default File/Edit/View/Window menu on Windows/Linux. The web
+    // UI provides its own in-page controls, so the native menu bar is just
+    // visual clutter. macOS keeps a menu (system requirement) but Electron's
+    // default is fine there.
+    if (process.platform !== 'darwin') Menu.setApplicationMenu(null)
     createWindow()
     bootstrap()
     initAutoUpdater()
