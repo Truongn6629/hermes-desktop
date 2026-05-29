@@ -60,27 +60,9 @@ function patch(id, marker, find, replace) {
 
 console.log(`Patching ${dtPath}`)
 
-// ── dt-pre-start ────────────────────────────────────────────────
-// Add `pre_start` method to _IncomingHandler so DingTalkStreamClient.start()
-// (dingtalk-stream >= 0.24) doesn't raise AttributeError.
-patch(
-  'dt-pre-start',
-  'def pre_start(self):  # patch:dt-pre-start',
-  `    def __init__(self, adapter: DingTalkAdapter, loop: Optional[asyncio.AbstractEventLoop] = None):
-        if DINGTALK_STREAM_AVAILABLE:
-            super().__init__()
-        self._adapter = adapter
-        self._loop = loop`,
-  `    def __init__(self, adapter: DingTalkAdapter, loop: Optional[asyncio.AbstractEventLoop] = None):
-        if DINGTALK_STREAM_AVAILABLE:
-            super().__init__()
-        self._adapter = adapter
-        self._loop = loop
-
-    def pre_start(self):  # patch:dt-pre-start
-        """Required by dingtalk_stream >= 0.24 DingTalkStreamClient.start()."""
-        pass`,
-)
+// NOTE: the former `dt-pre-start` patch was retired — hermes-agent now ships
+// `_IncomingHandler.pre_start()` natively (present in 0.15.x and on main), so
+// re-adding it just injected a duplicate method.
 
 // ── dt-card-tpl-env ─────────────────────────────────────────────
 // Fall back to DINGTALK_CARD_TEMPLATE_ID env var.

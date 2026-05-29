@@ -132,6 +132,28 @@ jobs:
           path: artifacts
           merge-multiple: true
 
+      # The two macOS matrix jobs each emit their own `latest-mac.yml`; the
+      # flat download above keeps only one arch, so electron-updater would
+      # serve the other arch a mismatched dmg. Pull both per-arch artifacts
+      # and merge their `files:` lists into a single manifest.
+      - name: Download mac per-arch artifacts (for manifest merge)
+        uses: actions/download-artifact@v4
+        with:
+          pattern: dist-darwin-*
+          path: mac-arch
+
+      - name: Merge macOS auto-update manifests
+        run: |
+          ARM="mac-arch/dist-darwin-arm64/latest-mac.yml"
+          X64="mac-arch/dist-darwin-x64/latest-mac.yml"
+          if [ -f "$ARM" ] && [ -f "$X64" ]; then
+            node scripts/merge-mac-latest-yml.mjs "$ARM" "$X64" > artifacts/latest-mac.yml
+            echo "── merged latest-mac.yml ──"
+            cat artifacts/latest-mac.yml
+          else
+            echo "⚠ Expected both mac manifests, found: ARM=$([ -f "$ARM" ] && echo yes || echo no) X64=$([ -f "$X64" ] && echo yes || echo no). Leaving the flat one as-is."
+          fi
+
       - name: List artifacts
         run: ls -la artifacts/
 
