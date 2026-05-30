@@ -72,6 +72,19 @@ patch(
   '$1.substring(0,Math.max($1.lastIndexOf("/"),$1.lastIndexOf("\\\\")))',
 )
 
+// Custom avatar upload fails with HTTP 413. Avatars are posted as base64
+// image data URLs in a JSON body; the handler allows 1MB of raw image
+// (~1.37MB base64), but the body parser is registered with the default 1mb
+// jsonLimit, so it 413s before the handler runs. Inject larger json/text
+// limits into the bodyParser() call (anchored on the bootstrap log string).
+// Upstreamed in EKKOLearnAI/hermes-web-ui#1149 — drop once the submodule has it.
+patch(
+  'webui-avatar-bodyparser-limit',
+  /jsonLimit:"4mb"/,
+  /\.use\(([A-Za-z0-9_$]+)\(\)\),console\.log\("\[bootstrap\] cors \+ bodyParser registered/,
+  '.use($1({encoding:"utf-8",jsonLimit:"4mb",textLimit:"4mb"})),console.log("[bootstrap] cors + bodyParser registered',
+)
+
 if (src !== before) writeFileSync(SERVER_JS, src)
 
 // NOTE: a previous `worker-tcp-everywhere` patch on hermes_bridge.py was
